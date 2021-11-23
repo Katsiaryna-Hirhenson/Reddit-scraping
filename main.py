@@ -1,6 +1,14 @@
+"""This module does parsing of 100 top month posts from Reddit
+
+First code opens URL, scrolls page down until it gets 100 post urls.
+Then it opens each link, collects data from the post and moves to user profile.
+When all data for 100 posts is parsed, it is sent to http://localhost:8087/.
+"""
+
 import logging
 import uuid
 from datetime import datetime
+import argparse
 
 import requests
 from bs4 import BeautifulSoup
@@ -17,8 +25,11 @@ chrome_options.add_argument('window-size=1200x600')
 chrome_options.add_argument('--disable-notifications')
 chrome_options.add_argument("--headless")
 
-"""Insert path to your chromedriver into 'executable_path' argument below."""
-driver = webdriver.Chrome(executable_path='./chromedriver', options=chrome_options)
+parser = argparse.ArgumentParser(description='Path to chromedriver')
+parser.add_argument('path', type=str, help='Input path  to your chromedriver')
+args = parser.parse_args()
+
+driver = webdriver.Chrome(executable_path=args.path, options=chrome_options)
 driver.implicitly_wait(300)
 driver.get(URL)
 
@@ -54,7 +65,7 @@ def parse_hundred_href():
         post_urls = driver.find_elements(By.CLASS_NAME, '_3jOxDPIQ0KaOWpzvSQo-1s')
         for each_url in post_urls:
             post_url = each_url.get_attribute('href')
-            if len(LINK_SET) >= 5:
+            if len(LINK_SET) >= 15:
                 return True
             LINK_SET.add(post_url)
 
@@ -97,15 +108,15 @@ def scraping_user_profile(url: str, uid: str):
 
         # check if you are on "are you over 18" page; if yes, skip this post
         if soup.find(class_='bDDEX4BSkswHAG_45VkFB'):
-            SINGLE_POST[uid].append('You must be over 18 to view this page')
+            yes_button = driver.find_element(By.XPATH, '//*[@id="SHORTCUT_FOCUSABLE_DIV"]/div[2]/div/div/div[1]/div/div/div[2]/button')
+            ActionChains(driver).move_to_element(yes_button).click().perform()
 
-        else:
-            karma = driver.find_element(By.CLASS_NAME, '_1hNyZSklmcC7R_IfCUcXmZ')
-            ActionChains(driver).move_to_element(karma).perform()
-            html = driver.page_source
-            soup = BeautifulSoup(html, 'lxml')
-            for value in SCRAPING_USER_PROFILE.values():
-                scraping_data_by_class(class_name=value, soup=soup, uid=uid)
+        karma = driver.find_element(By.CLASS_NAME, '_1hNyZSklmcC7R_IfCUcXmZ')
+        ActionChains(driver).move_to_element(karma).perform()
+        html = driver.page_source
+        soup = BeautifulSoup(html, 'lxml')
+        for value in SCRAPING_USER_PROFILE.values():
+            scraping_data_by_class(class_name=value, soup=soup, uid=uid)
 
     except Exception as ex:
         print(ex)
@@ -147,7 +158,7 @@ def scraping_post_information(url: str):
 if __name__ == '__main__':
 
     start_datetime = datetime.today().strftime('%Y.%m.%d.%H:%M')
-    print(start_datetime)
+    print('Start parsing at ', start_datetime)
 
     while True:
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
@@ -164,7 +175,7 @@ if __name__ == '__main__':
 
     driver.quit()
     stop_datetime = datetime.today().strftime('%Y.%m.%d.%H:%M')
-    print(stop_datetime)
+    print('Stop parsing at ', stop_datetime)
 
     for SINGLE_POST in ALL_POSTS_INFORMATION:
         for key, value in SINGLE_POST.items():
@@ -172,12 +183,11 @@ if __name__ == '__main__':
 
     logging.info('Posting information on server...\n')
     try:
-         r = requests.post('http://localhost:8087/',data=DATA_FOR_SERVER)
+         r = requests.post('http://localhost:8087/', data=DATA_FOR_SERVER)
 
     except Exception as ex:
         print(ex)
 
-#
 
 
 
