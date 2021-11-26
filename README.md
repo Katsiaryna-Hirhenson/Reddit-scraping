@@ -1,3 +1,4 @@
+
 # iTechArt_StudentLab_Hirhenson
 # Reddit Scraping
 
@@ -26,17 +27,15 @@ You will find more detailed information on how to use requests further in sectio
 
 ## What needs to be installed
 
-- Chrome browser
-- Chromedriver for your browser version
-- Python 3
-- Requirements.txt
-
+ - [ ] **Chrome browser**
 Get Chrome browser at https://www.google.com/intl/ru/chrome/
-
-Chromedriver is needed for the script to be able to interact with your Chrome browser
-Download a driver for your browser version at https://chromedriver.storage.googleapis.com/index.html
-
+ - [ ] **Chromedriver for your browser version**
+ Download a driver for your browser version at https://chromedriver.storage.googleapis.com/index.html
+ - [ ] **Python 3**
 Get Python 3 at https://www.python.org/downloads/
+
+
+
 
 “Requirements files” are files containing a list of items to be installed in this project
 To install it use:
@@ -47,53 +46,73 @@ For Windows: py -m pip install -r requirements.txt
 
 **NOTE!** The program takes a wile to execute, please be patient and try not to use any other programs simultaneously!
 
+First you need to clone git repository.
+Open your terminal and past the following:
+
+    $git clone https://github.com/Katsiaryna-Hirhenson/iTechArt_StudentLab_Hirhenson.git scraping
+This line of code will creat a folder 'scraping' with repository files.
+
+Next you need to move to your project directory.
+
+    $cd scraping
+
+Then you need to launch virtual envirnoment for this project.
+
+    $python3 -m venv scraping_env
+And activate it.
+
+    $source -m  scraping_env/bin/activate
+Then you need to inall requirements.txt file.
+
+    $python3 -m pip install -r requirements.txt
+Now you can move to project files.
 First of all you need to run server.py module.
-You need to open a command-line of your terminal and type the word python3 followed by the path to your server.py file.
-Examples: python3 /Users/reddit_scraping/server.py
+
+    $python3 server.py
 
 You should see a message like this: Tue Nov 23 15:17:21 2021 Server Starts - localhost:8087
 
 Next step is to launch main.py
-You need to open another window of your terminal. SERVER MUST BE STILL RUNNING!
-Here you will be passing two paths, one to your main.py file and another one to your chromedriver.
-Type the word python3 followed by the path to your main.py file, than press spase and insert path to your chromedriver
-Examples: python3 /Users/reddit_scraping/main.py /Users/reddit_scraping/chromedriver
+You need to open another window of your terminal. 
+SERVER MUST BE STILL RUNNING!
+Here you need to type a path to your main.py file, number of posts you would like to path and another path to your chromedriver. All seperated by a space.
 
-The program should start executing. You will see message 'Start parsing at "current date and time "'.
-When all information is collected you will see message 'Stop parsing at "current date and time "'.
+    $python3 /Users/reddit_scraping/main.py 100 /Users/reddit_scraping/chromedriver
+
+
+The program should start executing. You will see message 'Start parsing at ...' .
+When all information is collected you will see message 'Stop parsing at ...' .
 Then information will be sent to your loval server and you can start interacting with it. 
 
 ## How to interact with server
 
 This server module provides responces for POST/GET/PUT/DELETE requests.
-It is much more convenient to use Postman for interaction.
-You can find it at https://www.postman.com/
+It is much more convenient to use **Postman** for interaction.
+**You can find it at https://www.postman.com/**
 
-**NOTE!** UNIQUE ID should be in a format of 32 elemen line of numbers and letters (Latin alphabet, lowercase). Example: 5bbdd2544bdb11ecb952acde48001122
+**NOTE!** UNIQUE_ID should be in a format of 32 elemen line of numbers and letters (Latin alphabet, lowercase).
 
-**POST http://localhost:8087/**
+*Example: 5bbdd2544bdb11ecb952acde48001122*
 
-Receives data and writes it into txt file. 
-File will have following name: reddit-CURRENT_DATE.txt, where CURRENT_DATE is today's date in "year.month.day.hours.minutes" format.
+**COMMANDS:**
 
-**POST http://localhost:8087/posts**
+    POST http://localhost:8087/posts
 
-Adds new line to a document.
-The format of new line should be "UNIQUE ID: [new informatiom]".
+Receves data and creates a .txt document where one line contains information about one post.
 
-**GET http://localhost:8087/posts**
+    GET http://localhost:8087/posts
 
 Returns all posts in json format.
 
-**GET http://localhost:8087/posts/UNIQUE ID**
+    GET http://localhost:8087/posts/UNIQUE_ID
 
 Returns one post with corresponding id in json format.
 
-**DELETE http://localhost:8087/posts/UNIQUE ID**
-
+    DELETE http://localhost:8087/posts/UNIQUE_ID
+    
 Deletes one post with corresponding id.
 
-**PUT http://localhost:8087/posts/UNIQUE ID**
+    PUT http://localhost:8087/posts/UNIQUE_ID
 
 Updates one post with corresponding id.
-The format of line you would like to update should be "UNIQUE ID: [new information]".
+The format of line you would like to update should be "UNIQUE ID;new information;".
