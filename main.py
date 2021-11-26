@@ -25,8 +25,9 @@ chrome_options.add_argument('window-size=1200x600')
 chrome_options.add_argument('--disable-notifications')
 chrome_options.add_argument("--headless")
 
-parser = argparse.ArgumentParser(description='Path to chromedriver')
-parser.add_argument('path', type=str, help='Input path  to your chromedriver')
+parser = argparse.ArgumentParser(description='Number pf posts and path to chromedriver')
+parser.add_argument('posts_number', type=int, help='Input number of posts you want to parse')
+parser.add_argument('path', type=str, help='Input path to your chromedriver')
 args = parser.parse_args()
 
 driver = webdriver.Chrome(executable_path=args.path, options=chrome_options)
@@ -45,9 +46,7 @@ SCRAPING_USER_PROFILE = {'user_cake_day': '_3KNaG9-PoXf4gcuy5_RCVy',
                          'full_karma': '_3uK2I0hi3JFTKnMUFHD2Pd'}
 
 LINK_SET = set()
-SINGLE_POST = {}
-ALL_POSTS_INFORMATION = []
-DATA_FOR_SERVER = ''
+SINGLE_POST = []
 
 logging.basicConfig(filename='logname.log',
                     filemode='w',
@@ -65,40 +64,32 @@ def parse_hundred_href():
         post_urls = driver.find_elements(By.CLASS_NAME, '_3jOxDPIQ0KaOWpzvSQo-1s')
         for each_url in post_urls:
             post_url = each_url.get_attribute('href')
-            if len(LINK_SET) >= 15:
+            if len(LINK_SET) >= args.posts_number:
                 return True
             LINK_SET.add(post_url)
 
-    except Exception as ex:
+    except TimeoutError as ex:
         print(ex)
 
 
-def scraping_data_by_class(class_name: str, soup: str, uid: str):
+def scraping_data_by_class(class_name: str, soup: str):
     """Collects data by class names.
 
     :param class_name: used to find and parse data from HTML
     :type class_name: str
     :param soup: HTML page to search through
     :type soup: str
-    :param uid: unique id for appending parsed data
-    :type uid: str
     """
-    try:
-        data = soup.find(class_=class_name)
-        data = data.text
-        SINGLE_POST[uid].append(data)
-
-    except Exception as ex:
-        print(ex)
+    data = soup.find(class_=class_name)
+    data = data.text
+    SINGLE_POST.append(str(data) + ';')
 
 
-def scraping_user_profile(url: str, uid: str):
+def scraping_user_profile(url: str):
     """Opens user profile. Collects user information.
 
     :param url: user url
     :type url: str
-    :param uid: unique id for appending parsed data
-    :type uid: str
     """
     logging.info('Start scraping user information...\n')
     try:
@@ -106,7 +97,8 @@ def scraping_user_profile(url: str, uid: str):
         html = driver.page_source
         soup = BeautifulSoup(html, 'lxml')
 
-        # check if you are on "are you over 18" page; if yes, skip this post
+        """check if you are on "are you over 18" page; if yes, skip this post"""
+
         if soup.find(class_='bDDEX4BSkswHAG_45VkFB'):
             yes_button = driver.find_element(By.XPATH, '//*[@id="SHORTCUT_FOCUSABLE_DIV"]/div[2]/div/div/div[1]/div/div/div[2]/button')
             ActionChains(driver).move_to_element(yes_button).click().perform()
@@ -116,9 +108,9 @@ def scraping_user_profile(url: str, uid: str):
         html = driver.page_source
         soup = BeautifulSoup(html, 'lxml')
         for value in SCRAPING_USER_PROFILE.values():
-            scraping_data_by_class(class_name=value, soup=soup, uid=uid)
+            scraping_data_by_class(class_name=value, soup=soup)
 
-    except Exception as ex:
+    except TimeoutError as ex:
         print(ex)
 
 
@@ -132,32 +124,32 @@ def scraping_post_information(url: str):
     try:
         driver.get(url)
         uid = uuid.uuid1().hex
-        SINGLE_POST[uid] = []
-        SINGLE_POST[uid].append(url)
+        SINGLE_POST.append(str(uid) + ';')
+        SINGLE_POST.append(str(url) + ';')
         date_posted = driver.find_element(By.CLASS_NAME, '_3jOxDPIQ0KaOWpzvSQo-1s')
         ActionChains(driver).move_to_element(date_posted).perform()
         html = driver.page_source
         soup = BeautifulSoup(html, 'lxml')
 
         for value in SCRAPING_POST_PROFILE.values():
-            scraping_data_by_class(class_name=value, soup=soup, uid=uid)
+            scraping_data_by_class(class_name=value, soup=soup)
 
-        # get link to move to user profile
+        """get link to move to user profile"""
+
         user_profile = soup.find(class_='_2mHuuvyV9doV3zwbZPtIPG')
         a_tag = user_profile.find('a')
         user_url_name = a_tag['href']
-        SINGLE_POST[uid].append(user_url_name)
+        SINGLE_POST.append(str(user_url_name) + ';')
         user_url = USER_URL_PART_ONE + str(user_url_name)
+        scraping_user_profile(user_url)
 
-        scraping_user_profile(user_url,uid=uid)
-
-    except Exception as ex:
+    except TimeoutError as ex:
         print(ex)
 
 
 if __name__ == '__main__':
 
-    start_datetime = datetime.today().strftime('%Y.%m.%d.%H:%M')
+    start_datetime = datetime.today().strftime('%Y.%m.%d.%H.%M')
     print('Start parsing at ', start_datetime)
 
     while True:
@@ -170,23 +162,19 @@ if __name__ == '__main__':
 
     for link in LINK_SET:
         scraping_post_information(link)
-        ALL_POSTS_INFORMATION[len(ALL_POSTS_INFORMATION):] = [dict(SINGLE_POST)]
+
+        without_n_string = ''
+        for element in SINGLE_POST:
+            without_n = element.replace('\n', ';')
+            without_n_string += without_n
+        without_n_string += '\n'
+        logging.info('Posting information on server...\n')
+        r = requests.post('http://localhost:8087/posts', data=without_n_string)
         SINGLE_POST.clear()
 
     driver.quit()
-    stop_datetime = datetime.today().strftime('%Y.%m.%d.%H:%M')
+    stop_datetime = datetime.today().strftime('%Y.%m.%d.%H.%M')
     print('Stop parsing at ', stop_datetime)
-
-    for SINGLE_POST in ALL_POSTS_INFORMATION:
-        for key, value in SINGLE_POST.items():
-            DATA_FOR_SERVER += '{}: {}\n'.format(key, value)
-
-    logging.info('Posting information on server...\n')
-    try:
-         r = requests.post('http://localhost:8087/', data=DATA_FOR_SERVER)
-
-    except Exception as ex:
-        print(ex)
 
 
 
