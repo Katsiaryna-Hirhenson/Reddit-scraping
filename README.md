@@ -28,10 +28,14 @@ You will find more detailed information on how to use requests further in sectio
 ## What needs to be installed
 
  - [ ] **Chrome browser**
-Get Chrome browser at https://www.google.com/intl/ru/chrome/
+
+ Get Chrome browser at https://www.google.com/intl/ru/chrome/
  - [ ] **Chromedriver for your browser version**
- Download a driver for your browser version at https://chromedriver.storage.googleapis.com/index.html
+ 
+ 
+Download a driver for your browser version at https://chromedriver.storage.googleapis.com/index.html
  - [ ] **Python 3**
+
 Get Python 3 at https://www.python.org/downloads/
 
 
