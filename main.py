@@ -27,10 +27,10 @@ chrome_options.add_argument("--headless")
 
 parser = argparse.ArgumentParser(description='Number pf posts and path to chromedriver')
 parser.add_argument('posts_number', type=int, help='Input number of posts you want to parse')
-parser.add_argument('path', type=str, help='Input path to your chromedriver')
+parser.add_argument('chromedriver_path', type=str, help='Input path to your chromedriver')
 args = parser.parse_args()
 
-driver = webdriver.Chrome(executable_path=args.path, options=chrome_options)
+driver = webdriver.Chrome(executable_path=str(args.chromedriver_path), options=chrome_options)
 driver.implicitly_wait(300)
 driver.get(URL)
 
@@ -69,7 +69,7 @@ def parse_hundred_href():
             LINK_SET.add(post_url)
 
     except TimeoutError as ex:
-        print(ex)
+        logging.exception(ex)
 
 
 def scraping_data_by_class(class_name: str, soup: str):
@@ -100,7 +100,8 @@ def scraping_user_profile(url: str):
         """check if you are on "are you over 18" page; if yes, skip this post"""
 
         if soup.find(class_='bDDEX4BSkswHAG_45VkFB'):
-            yes_button = driver.find_element(By.XPATH, '//*[@id="SHORTCUT_FOCUSABLE_DIV"]/div[2]/div/div/div[1]/div/div/div[2]/button')
+            yes_button = driver.find_element(By.XPATH,
+                                             '//*[@id="SHORTCUT_FOCUSABLE_DIV"]/div[2]/div/div/div[1]/div/div/div[2]/button')
             ActionChains(driver).move_to_element(yes_button).click().perform()
 
         karma = driver.find_element(By.CLASS_NAME, '_1hNyZSklmcC7R_IfCUcXmZ')
@@ -111,7 +112,7 @@ def scraping_user_profile(url: str):
             scraping_data_by_class(class_name=value, soup=soup)
 
     except TimeoutError as ex:
-        print(ex)
+        logging.exception(ex)
 
 
 def scraping_post_information(url: str):
@@ -144,7 +145,7 @@ def scraping_post_information(url: str):
         scraping_user_profile(user_url)
 
     except TimeoutError as ex:
-        print(ex)
+        logging.exception(ex)
 
 
 if __name__ == '__main__':
@@ -169,7 +170,7 @@ if __name__ == '__main__':
             without_n_string += without_n
         without_n_string += '\n'
         logging.info('Posting information on server...\n')
-        r = requests.post('http://localhost:8087/posts', data=without_n_string)
+        r = requests.post('http://localhost:8087/posts/', data=without_n_string)
         SINGLE_POST.clear()
 
     driver.quit()
