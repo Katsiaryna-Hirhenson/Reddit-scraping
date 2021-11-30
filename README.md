@@ -5,7 +5,7 @@
 ## Description
 
 Project ‘Reddit Scraping’ parses information from the website https://www.reddit.com.
-This program parses month top 100 posts, generates a unique ID for each and gets the following info:
+This program parses month top posts, generates a unique ID for each and gets the following info:
 - Link to the post
 - Username
 - User cake day
@@ -17,11 +17,11 @@ This program parses month top 100 posts, generates a unique ID for each and gets
 
 ## How it works?
 
-First the program opens https://www.reddit.com/top/?t=month and collects links for 100 posts.
+First the program opens https://www.reddit.com/top/?t=month and collects links for posts.
 Next it opens each post, collects necessary information and moves to user profile.
 Aftaer collecting information from user profile, it moves to the next post.
 
-When all information for 100 posts is collected, it is sent to http://localhost:8087/.
+When all information for posts is collected, it is sent to http://localhost:8087/.
 Usin server module you can interact with this information via POST/GET/PUT/DELETE requests. 
 You will find more detailed information on how to use requests further in section "**How to interact with server**"
 
@@ -39,19 +39,12 @@ Download a driver for your browser version at https://chromedriver.storage.googl
 Get Python 3 at https://www.python.org/downloads/
 
 
-
-
-“Requirements files” are files containing a list of items to be installed in this project
-To install it use:
-For Unix\macOs: python -m pip install -r requirements.txt
-For Windows: py -m pip install -r requirements.txt
-
 ## How to launch
 
 **NOTE!** The program takes a wile to execute, please be patient and try not to use any other programs simultaneously!
 
 First you need to clone git repository.
-Open your terminal and past the following:
+Open your terminal and paste the following:
 
     $git clone https://github.com/Katsiaryna-Hirhenson/iTechArt_StudentLab_Hirhenson.git scraping
 This line of code will creat a folder 'scraping' with repository files.
