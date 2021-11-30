@@ -77,16 +77,16 @@ First of all you need to run server.py module.
 You should see a message like this: Tue Nov 23 15:17:21 2021 Server Starts - localhost:8087
 
 Next step is to launch main.py
-You need to open another window of your terminal. 
-SERVER MUST BE STILL RUNNING!
-Here you need to type a path to your main.py file, number of posts you would like to path and another path to your chromedriver. All seperated by a space.
+**You need to open another window of your terminal. 
+SERVER MUST BE STILL RUNNING!**
+Here you need to run main.py file, insert number of posts you would like to parse and put in path to your chromedriver. All seperated by spaces.
 
-    $python3 /Users/reddit_scraping/main.py 100 /Users/reddit_scraping/chromedriver
+    $python3 main.py 100 /Users/reddit_scraping/chromedriver
 
 
-The program should start executing. You will see message 'Start parsing at ...' .
-When all information is collected you will see message 'Stop parsing at ...' .
-Then information will be sent to your loval server and you can start interacting with it. 
+The program should start executing. You will see a message 'Start parsing at ...' .
+When all information is collected you will see a message 'Stop parsing at ...' .
+Then information will be sent to your local server and you can start interacting with it. 
 
 ## How to interact with server
 
